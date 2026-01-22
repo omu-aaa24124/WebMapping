@@ -59,7 +59,7 @@
             // 地理院地図インスタンスへレイヤーを追加
             map.addLayer(chiriinLayer);
 
-            L.control.layers({
+            var LayerControl = L.control.layers({
                 "OpenStreetMap": backgroundLayer,
                 "地理院地図（標準）": chiriinLayer
             }).addTo(map);
@@ -75,16 +75,23 @@
             map.attributionControl.addAttribution(
             '<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-P29-v2_0.html">国土数値情報 - 学校データ</a>',
             );
-            // GeoJSONレイヤーを作成
-            fetch('./P29-21_27.geojson') // 大阪府の学校データのGeoJSONを非同期読み込み
-                .then((res) => res.json())
-                .then((json) => {
-                // GeoJSONレイヤーを作成
-                L.geoJSON(json)
-                    .bindPopup((layer) => layer.feature.properties.P29_004)    // ポップアップで学校名を表示
-                    .addTo(map);  
-                });
 
+            // 行政区域レイヤーを作成
+            fetch("./N03-23_27_230101.geojson") // 行政区域データを非同期読み込み
+                .then((response) => response.json())
+                .then((data) => {
+                    // 特定の値によりGeoJSONをフィルタリング
+                    var filteredData = data.features.filter(feature => feature.properties.N03_004 === '堺市中区');
+                    var selected_area = L.geoJSON(filteredData)
+                        .bindPopup((layer) => layer.feature.properties.N03_004) // ポップアップで表示
+                    map.addLayer(selected_area)
+                    // チェックボックス
+                    LayerControl.addOverlay(selected_area, "行政区域")
+                    // GeoJSONレイヤに地図がフィットするように表示範囲を自動調整
+                    map.fitBounds(selected_area.getBounds());
+            });
+            
+            //GeoJSONレイヤーを作成
                 fetch('./P29-21.geojson') // 全国分の学校データ（5万件超）のGeoJSONを非同期読み込み
                     .then((res) => res.json())
                     .then((json) => {
@@ -96,23 +103,30 @@
                             .addTo(map);
                         L.geoJSON(json).addTo(markers); // クラスタリングレイヤーにGeoJSONデータをセット
                     });
+            
 
-                    // KMLレイヤーを作成
-                    /*fetch("./niigata_route.kml") 
-                        .then(res => res.text())
-                            .then(kmltext => {
-                                // 新しいKMLレイヤをオーバーレイ
-                                const parser = new DOMParser();
-                                const kml = parser.parseFromString(kmltext, 'text/xml');
-                                const track = new L.KML(kml);
-                                map.addLayer(track);
+            // ローカルPC上のOSRMサーバで杉本キャンパスからなかもずキャンパスまでのルートを検索するURL
+            const url = 'https://routing.openstreetmap.de/routed-car/route/v1/driving/135.505276,34.592331;135.506274,34.544865?geometries=geojson&overview=full'
 
-                                // 地図をKMLに合うように調整
-                                const bounds = track.getBounds();
-                                map.fitBounds(bounds);  
-                    });
-                    */
-                
+            async function addRouteLayer(){
+                const response = await fetch(url);
+                const json = await response.json();
+                routeLayer = L.geoJSON(json['routes'][0]['geometry'],{
+                    "color": "#FF00FF",
+                    "weight": 6,
+                    "opacity": 0.65
+                });                            
+                routeLayer.addTo(map);
+      
+                /*
+                // 地図をルートに合うように調整
+                const bounds = routeLayer.getBounds();
+                map.fitBounds(bounds); 
+                */
+            }
+            // 地図にルートを追加
+            addRouteLayer();
+
             //スケールバー
             L.control.scale().addTo(map);
         </script>
