@@ -81,29 +81,66 @@
                 .then((response) => response.json())
                 .then((data) => {
                     // 特定の値によりGeoJSONをフィルタリング
-                    var filteredData = data.features.filter(feature => feature.properties.N03_004 === '堺市中区');
-                    var selected_area = L.geoJSON(filteredData)
+                    var filteredData1 = data.features.filter(feature => feature.properties.N03_004 === '堺市中区');
+                    var selected_area1 = L.geoJSON(filteredData1)
                         .bindPopup((layer) => layer.feature.properties.N03_004) // ポップアップで表示
-                    map.addLayer(selected_area)
+                    map.addLayer(selected_area1)
                     // チェックボックス
-                    LayerControl.addOverlay(selected_area, "行政区域")
+                    LayerControl.addOverlay(selected_area1, "行政区域(堺市中区)")
                     // GeoJSONレイヤに地図がフィットするように表示範囲を自動調整
-                    map.fitBounds(selected_area.getBounds());
+                    map.fitBounds(selected_area1.getBounds());
             });
             
             //GeoJSONレイヤーを作成
-                fetch('./P29-21.geojson') // 全国分の学校データ（5万件超）のGeoJSONを非同期読み込み
-                    .then((res) => res.json())
-                    .then((json) => {
-                        // クラスタリングレイヤーを作成し地図に追加
-                        const markers = L.markerClusterGroup()
-                            .bindPopup(
-                                (layer) => layer.feature.properties.P29_004, // ポップアップで学校名を表示
-                            )
-                            .addTo(map);
-                        L.geoJSON(json).addTo(markers); // クラスタリングレイヤーにGeoJSONデータをセット
-                    });
-            
+            fetch('./P29-21_27.geojson') // 大阪の学校データのGeoJSONを非同期読み込み
+                .then((res) => res.json())
+                .then((json) => {
+                    // クラスタリングレイヤーを作成し地図に追加
+                    const markers1 = L.markerClusterGroup()
+                        .bindPopup(
+                            (layer) => layer.feature.properties.P29_004, // ポップアップで学校名を表示
+                        );
+                    L.geoJSON(json).eachLayer(layer => markers1.addLayer(layer));
+                    // 地図に追加
+                     map.addLayer(markers1);
+
+                    // チェックボックスに追加
+                    LayerControl.addOverlay(markers1, "学校");
+                });
+
+
+            //課題
+            fetch("./27202A1968.geojson") // 行政区域データを非同期読み込み
+                .then((response) => response.json())
+                .then((data) => {
+                    // 特定の値によりGeoJSONをフィルタリング
+                    var filteredData2 = data.features.filter(feature => feature.properties.N03_004 === '岸和田市');
+                    var selected_area2 = L.geoJSON(filteredData2)
+                        .bindPopup((layer) => layer.feature.properties.N03_004) // ポップアップで表示
+                    map.addLayer(selected_area2)
+                    // チェックボックス
+                    LayerControl.addOverlay(selected_area2, "行政区域(岸和田市)")
+                    // GeoJSONレイヤに地図がフィットするように表示範囲を自動調整
+                    //map.fitBounds(selected_area.getBounds());
+            });
+
+            fetch('./27000_1.geojson') // 大阪の避難所のGeoJSONを非同期読み込み
+                .then((res) => res.json())
+                .then((json) => {
+                    // クラスタリングレイヤーを作成し地図に追加
+                    const markers2 = L.markerClusterGroup()
+                        .bindPopup(
+                            (layer) => layer.feature.properties["施設・場所名"] // ポップアップで避難所名を表示
+                        );
+                    L.geoJSON(json).eachLayer(layer => markers2.addLayer(layer));
+                    // 地図に追加
+                     map.addLayer(markers2);
+
+                    // チェックボックスに追加
+                    LayerControl.addOverlay(markers2, "避難所");
+                });
+
+            //上記が課題ここまで
 
             // ローカルPC上のOSRMサーバで杉本キャンパスからなかもずキャンパスまでのルートを検索するURL
             const url = 'https://routing.openstreetmap.de/routed-car/route/v1/driving/135.505276,34.592331;135.506274,34.544865?geometries=geojson&overview=full'
