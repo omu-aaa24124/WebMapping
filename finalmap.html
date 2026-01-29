@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
     <head>
-        <title>1.地図タイルを背景として表示する</title>
+        <title>Webシステム構築基礎</title>
         <!-- LeafletのCSS読み込み -->
         <link
             rel="stylesheet"
@@ -108,8 +108,6 @@
                     LayerControl.addOverlay(markers1, "学校");
                 });
 
-
-            //課題
             fetch("./27202A1968.geojson") // 行政区域データを非同期読み込み
                 .then((response) => response.json())
                 .then((data) => {
@@ -120,8 +118,6 @@
                     map.addLayer(selected_area2)
                     // チェックボックス
                     LayerControl.addOverlay(selected_area2, "行政区域(岸和田市)")
-                    // GeoJSONレイヤに地図がフィットするように表示範囲を自動調整
-                    //map.fitBounds(selected_area.getBounds());
             });
 
             fetch('./27000_1.geojson') // 大阪の避難所のGeoJSONを非同期読み込み
@@ -140,8 +136,6 @@
                     LayerControl.addOverlay(markers2, "避難所");
                 });
 
-            //上記が課題ここまで
-
             // ローカルPC上のOSRMサーバで杉本キャンパスからなかもずキャンパスまでのルートを検索するURL
             const url = 'https://routing.openstreetmap.de/routed-car/route/v1/driving/135.505276,34.592331;135.506274,34.544865?geometries=geojson&overview=full'
 
@@ -155,11 +149,6 @@
                 });                            
                 routeLayer.addTo(map);
       
-                /*
-                // 地図をルートに合うように調整
-                const bounds = routeLayer.getBounds();
-                map.fitBounds(bounds); 
-                */
             }
             // 地図にルートを追加
             addRouteLayer();
